@@ -6,15 +6,112 @@
 
 using namespace std;
 
+//перечисление возможных окончаний чисел (для задачи 9)
 enum possibleEndings { //перечисление возможных окончаний чисел (для задачи 9)
     zero = 0, one = 1, two = 2, three = 3, four = 4,
     five = 5, six = 6, seven = 7, eight = 8, nine = 9
 };
 
+//функция для проверки соответствия числа открывающих скобок числу закрытых (для задачи 2)
+bool validParenthesesCheck(string current) { //функция для проверки соответствия числа открывающих скобок числу закрытых (для задачи 2)
+    int bracketsCount = 0; //счётчик для проверки корректности пар скобок в строке
+    for (char bracket : current) { //проверка осуществляется для символов в строке
+        if (bracket == '(') bracketsCount++; // если символ в строке — открывающая скобка, то в счётчик добавить единицу
+        else bracketsCount--; //иначе - убрать единицу
+
+        if (bracketsCount < 0) return false; //если счётчик во время проверки станет отрицательным, то нужно немедленно оборвать проверку для текущей строки
+    }
+
+    return bracketsCount == 0;
+}
+
+//функция для определения нормально структурированных пар скобок (для задачи 2)
+void findWellFormedParentheses(int pairNumber, string current) {
+    int totalCorrentResults = 0; //счётчик для подсчёта корректных вариаций строки
+    
+    if (current.length() == pairNumber * 2) { //при наборе нужного числа скобок (в два раза больше, чем число пар), то проверить строку
+        if (validParenthesesCheck(current)) { //если она корректная, то она будет выведена в консоль (вместе с отступом на следующую строку)
+            cout << current << "\n";
+        }
+        return; //после чего сразу производится выход из итерации
+    }
+
+    //независимо от проверки текущего варианта нужно вызывать функцию с той же строкой дальше (перебор через итерации)
+    findWellFormedParentheses(pairNumber, current + "(");
+    findWellFormedParentheses(pairNumber, current + ")");
+}
+
+//функция для проверки пар скобок в строке (для задачи 4) (подобно функции проверки скобок для задачи 2)
+int checkParenthesePairsLeft(int n, string parenthesesString) {
+    int maximumLength = 0; //счётчики для символов в самой длинной подстроке корректно записанных скобок из строки и для символов в текщей подстроке
+    int currentLength = 0;
+
+    for (int i = 0; i < n; i++) { //основной цикл
+        int leftBracketsCount = 0; //счётчики для подсчёта открывающих и закрывающих скобок
+        int rightBracketsCount = 0;
+
+        for (int j = i; j < n; j++) { //дополнительный цикл (нужен, чтобы функция обрабатывала строки, в которых сразу же встречается закрывающая скобка)
+            if ((char)parenthesesString[j] == '(') leftBracketsCount++; //если символом на позиции i является открывающая скобка, то увеличить счётчик открывающих скобок
+            else rightBracketsCount++; // иначе - увеличить счётчик закрывающих скобок
+        }
+
+        if (leftBracketsCount == rightBracketsCount) { //если в открывающих и закрывающих скобок поровну, то зафиксировать длину подстроки и проверить её
+            currentLength = leftBracketsCount * 2; // запись текущей длины подстроки скобок
+            if (currentLength > maximumLength) maximumLength = currentLength; //если она превышает старое значение, то отметить новую наибольшую длину подстроки
+        }
+    }
+    
+    return maximumLength;
+}
+
+//функция для проверки пар скобок в строке (для задачи 4) (подобно функции проверки скобок для задачи 2)
+int checkParenthesePairsRight(int n, string parenthesesString) {
+    int maximumLength = 0; //счётчики для символов в самой длинной подстроке корректно записанных скобок из строки и для символов в текщей подстроке
+    int currentLength = 0;
+
+    for (int i = n - 1; i >= 0; i--) { //основной цикл
+        int leftBracketsCount = 0; //счётчики для подсчёта открывающих и закрывающих скобок
+        int rightBracketsCount = 0;
+
+        for (int j = i; j >= 0; j--) { //дополнительный цикл (нужен, чтобы функция обрабатывала строки, в которых сразу же встречается закрывающая скобка)
+            if ((char)parenthesesString[j] == ')') rightBracketsCount++; //если символом на позиции i является открывающая скобка, то увеличить счётчик открывающих скобок
+            else leftBracketsCount++; // иначе - увеличить счётчик закрывающих скобок
+        }
+
+        if (rightBracketsCount == leftBracketsCount) { //если в открывающих и закрывающих скобок поровну, то зафиксировать длину подстроки и проверить её
+            currentLength = rightBracketsCount * 2; // запись текущей длины подстроки скобок
+            if (currentLength > maximumLength) maximumLength = currentLength; //если она превышает старое значение, то отметить новую наибольшую длину подстроки
+        }
+    }
+
+    return maximumLength;
+}
+
+//функция для определения совпадающих цифр в числах (для задачи 5)
+int findRepeatingNumbers(string number, int repeatedDigits) {
+    int foundRepeatedbuffer = repeatedDigits; //копирование изначального значения найденных чисел с повторяющимися цифрами (для избежания проблем с подсчётом)
+
+    if (number.length() <= 1) { //если число имеет лишь одну цифру или не имеет их вовсе, то пропустить проверку
+        return repeatedDigits = 0;
+    }
+    else {
+        for (int i = 0; i < number.size() - 1; i++) { //цикл для проверки цифр в числе (двойной)
+            for (int j = i + 1; j < number.size(); j++) {
+                if (number[i] == number[j]) { //если будет совпадение, то отметить это в счётчике и выйти из циклов
+                     repeatedDigits++;
+                     break;
+                }
+            }
+            if (repeatedDigits > foundRepeatedbuffer) break; //если во время проверки связки i-того числа с j-тым (до замены i-того) число было отмечено как найденное, то вырваться из цикла проверок
+        }
+
+        return repeatedDigits; //независимо от результатов проверки вернуть число чисел в повторяющимися цифрами
+    }
+}
+
 // функция поиска максимального числа в массиве (задача 7)
 int findMaxNumber(vector<int> array) {
     int maxFoundNumber = 0; //переменная для записи максимального числа в массиве
-    int secondMaxFoundNumber = 0; //второе максимальное число в массиве
 
     for (int i = 0; i < array.size(); i++) {
         if (array[i] > maxFoundNumber) maxFoundNumber = array[i]; //если число массива больше найденного максимального, то переписать его
@@ -120,7 +217,8 @@ int findEndingNumber(int base, int power) {
     }
 }
 
-void taskNumberCheck(int taskNumber) { //функция для запуска отдельных функций для задач
+//функция для запуска отдельных функций для задач
+void taskNumberCheck(int taskNumber) {
     if(taskNumber == 1) { //задача 1
         int n = 0; //размер массива
 
@@ -184,7 +282,21 @@ void taskNumberCheck(int taskNumber) { //функция для запуска о
         else cout << "Пиковые значения в массиве не найдены."; //иначе — сообщение об их отсутствии
     }
     else if (taskNumber == 2) { //задача 2
-        cout << "Задача не реализована.";
+        cout << "Задача 2.\nДаны n пар скобок. Напишите функцию, которая выведет все комбинации корректно записанных скобок с заданным числом пар скобок.";
+
+        int n = 0; //число пар открывающих и закрывающих скобок
+        int correctResults = 0; //число
+        string currentVariant; //строка для текущего в цикле варианта
+
+        cout << "Введите число открывающих и закрывающих скобок n от 1 до 8: ";
+        cin >> n; //ввод числа пар открывающих и закрывающих скобок
+        while (n < 1 || n > 8) {
+            cout << "Введено некорректное число. Введите число от 1 до 8:\n";
+            cin >> n;
+        }
+
+        cout << "Нормально структурированные пары скобок:\n";
+        findWellFormedParentheses(n, currentVariant); //вызов функции для поиска и вывода нормально структурированных пар скобок
     }
     else if (taskNumber == 3) { //задача 3
         cout << "Задача 3.\nДаны два отсортированных целочисленных массива размеров n и m соответственно.\nСлейте их вместе и найдите среднее значение нового массива.\n";
@@ -239,10 +351,25 @@ void taskNumberCheck(int taskNumber) { //функция для запуска о
 
     }
     else if (taskNumber == 4) { //задача 4
-        cout << "Задача не реализована.";
+        cout << "Задача 4.\nДана строка, состоящая только из символов '(' И ')'.\nНайдите и выведите длинную длиннейшей подстроки с корректно собранными скобками.\n";
+        string parenthesesString; //строка для хранения записанных скобок
+        int maximumSequence = 0; //переменная для хранения максимальной последовательности корректно собранных скобок
+        
+        cout << "Введите строку из открывающих и закрывающих скобок: ";
+        cin >> parenthesesString; //ввод строки
+
+        if (parenthesesString.size() <= 1) return; // если строка пустая или имеет всего один символ, то длина подстроки составит 0
+        else { //иначе - проверять
+            int n = parenthesesString.size(); //получение размера строки
+            maximumSequence = checkParenthesePairsLeft(n, parenthesesString); //вызов функции для расчёта длины подстроки (ориентируясь на левую часть)
+
+            if (maximumSequence == 0) maximumSequence = checkParenthesePairsRight(n, parenthesesString); //если результат не получился, то провести расчёт, опираясь на правую часть
+
+            cout << "Длина наибольшей подстроки: " << maximumSequence;
+        }
     }
     else if (taskNumber == 5) { //задача 5
-        cout << "Задача 4.\nДано число n от диапазона [1; n]. Найдите число чисел в диапазоне от 1 до n включительно," <<
+        cout << "Задача 5.\nДано число n от диапазона [1; n]. Найдите число чисел в диапазоне от 1 до n включительно," <<
             "в которых есть хотя бы одна повторяющаяся цифра.\nПримеры: 11, 22, 101, 1000 и т.д.\n";
         
         int n = 0; //верхняя граница диапазона для работы
@@ -255,97 +382,20 @@ void taskNumberCheck(int taskNumber) { //функция для запуска о
             cin >> n;
         }
 
-        for (int i = 1; i <= n; i++) { //основной цикл
-            string charNumber = std::to_string(i); //запись числа как строки
-            if (charNumber.length() == 1); // поиск повторяющихся цифр (для чисел с одной цифрой всё просто — они автоматически пропускаются, а остальные нужно проверять)
-            else if (charNumber.length() == 2) { //если хоть одна цифра совпадёт (путём сравнения цифр в числе), то счётчик таких чисел увеличится на 1
-                if (charNumber[0] == charNumber[1]) repeatedDigitsTotalNumber++;
-            }
-            else if (charNumber.length() == 3) {
-                if (charNumber[0] == charNumber[1] || charNumber[0] == charNumber[2] || charNumber[1] == charNumber[2]) repeatedDigitsTotalNumber++;
-            }
-            else if (charNumber.length() == 4) {
-                if (charNumber[0] == charNumber[1] || charNumber[0] == charNumber[2] || charNumber[0] == charNumber[3] ||
-                    charNumber[1] == charNumber[2] || charNumber[1] == charNumber[3] || charNumber[2] == charNumber[3]) repeatedDigitsTotalNumber++;
-            }
-            else if (charNumber.length() == 5) {
-                if (charNumber[0] == charNumber[1] || charNumber[0] == charNumber[2] || charNumber[0] == charNumber[3] ||
-                    charNumber[0] == charNumber[4] || charNumber[1] == charNumber[2] || charNumber[1] == charNumber[3] ||
-                    charNumber[1] == charNumber[4] || charNumber[2] == charNumber[3] || charNumber[2] == charNumber[4] ||
-                    charNumber[3] == charNumber[4]) repeatedDigitsTotalNumber++;
-            }
-            else if (charNumber.length() == 5) {
-                if (charNumber[0] == charNumber[1] || charNumber[0] == charNumber[2] || charNumber[0] == charNumber[3] ||
-                    charNumber[0] == charNumber[4] || charNumber[1] == charNumber[2] || charNumber[1] == charNumber[3] ||
-                    charNumber[1] == charNumber[4] || charNumber[2] == charNumber[3] || charNumber[2] == charNumber[4] ||
-                    charNumber[3] == charNumber[4]) repeatedDigitsTotalNumber++;
-            }
-            else if (charNumber.length() == 6) {
-                if (charNumber[0] == charNumber[1] || charNumber[0] == charNumber[2] || charNumber[0] == charNumber[3] ||
-                    charNumber[0] == charNumber[4] || charNumber[0] == charNumber[5] || charNumber[1] == charNumber[2] ||
-                    charNumber[1] == charNumber[3] || charNumber[1] == charNumber[4] || charNumber[1] == charNumber[5] ||
-                    charNumber[2] == charNumber[3] || charNumber[2] == charNumber[4] || charNumber[2] == charNumber[5] ||
-                    charNumber[3] == charNumber[4] || charNumber[3] == charNumber[5] || charNumber[4] == charNumber[5]) repeatedDigitsTotalNumber++;
-            }
-            else if (charNumber.length() == 7) {
-                if (charNumber[0] == charNumber[1] || charNumber[0] == charNumber[2] || charNumber[0] == charNumber[3] ||
-                    charNumber[0] == charNumber[4] || charNumber[0] == charNumber[5] || charNumber[0] == charNumber[6] ||
-                    charNumber[1] == charNumber[2] || charNumber[1] == charNumber[3] || charNumber[1] == charNumber[4] ||
-                    charNumber[1] == charNumber[5] || charNumber[1] == charNumber[6] || charNumber[2] == charNumber[3] ||
-                    charNumber[2] == charNumber[4] || charNumber[2] == charNumber[5] || charNumber[2] == charNumber[6] ||
-                    charNumber[3] == charNumber[4] || charNumber[3] == charNumber[5] || charNumber[3] == charNumber[6] ||
-                    charNumber[4] == charNumber[5] || charNumber[4] == charNumber[6] || charNumber[5] == charNumber[6]) repeatedDigitsTotalNumber++;
-            }
-            else if (charNumber.length() == 8) {
-                if (charNumber[0] == charNumber[1] || charNumber[0] == charNumber[2] || charNumber[0] == charNumber[3] ||
-                    charNumber[0] == charNumber[4] || charNumber[0] == charNumber[5] || charNumber[0] == charNumber[6] ||
-                    charNumber[0] == charNumber[7] || charNumber[1] == charNumber[2] || charNumber[1] == charNumber[3] ||
-                    charNumber[1] == charNumber[4] || charNumber[1] == charNumber[5] || charNumber[1] == charNumber[6] ||
-                    charNumber[1] == charNumber[7] || charNumber[2] == charNumber[3] || charNumber[2] == charNumber[4] ||
-                    charNumber[2] == charNumber[5] || charNumber[2] == charNumber[6] || charNumber[2] == charNumber[7] ||
-                    charNumber[3] == charNumber[4] || charNumber[3] == charNumber[5] || charNumber[3] == charNumber[6] ||
-                    charNumber[3] == charNumber[7] || charNumber[4] == charNumber[5] || charNumber[4] == charNumber[6] ||
-                    charNumber[4] == charNumber[7] || charNumber[5] == charNumber[6] || charNumber[5] == charNumber[7] ||
-                    charNumber[6] == charNumber[7]) repeatedDigitsTotalNumber++;
-            }
-            else if (charNumber.length() == 9) {
-                if (charNumber[0] == charNumber[1] || charNumber[0] == charNumber[2] || charNumber[0] == charNumber[3] ||
-                    charNumber[0] == charNumber[4] || charNumber[0] == charNumber[5] || charNumber[0] == charNumber[6] ||
-                    charNumber[0] == charNumber[7] || charNumber[0] == charNumber[8] || charNumber[1] == charNumber[2] ||
-                    charNumber[1] == charNumber[3] || charNumber[1] == charNumber[4] || charNumber[1] == charNumber[5] ||
-                    charNumber[1] == charNumber[6] || charNumber[1] == charNumber[7] || charNumber[1] == charNumber[8] ||
-                    charNumber[2] == charNumber[3] || charNumber[2] == charNumber[4] || charNumber[2] == charNumber[5] ||
-                    charNumber[2] == charNumber[6] || charNumber[2] == charNumber[7] || charNumber[2] == charNumber[8] ||
-                    charNumber[3] == charNumber[4] || charNumber[3] == charNumber[5] || charNumber[3] == charNumber[6] ||
-                    charNumber[3] == charNumber[7] || charNumber[3] == charNumber[8] || charNumber[4] == charNumber[5] ||
-                    charNumber[4] == charNumber[6] || charNumber[4] == charNumber[7] || charNumber[4] == charNumber[8] ||
-                    charNumber[5] == charNumber[6] || charNumber[5] == charNumber[7] || charNumber[5] == charNumber[8] ||
-                    charNumber[6] == charNumber[7] || charNumber[6] == charNumber[8] || charNumber[7] == charNumber[8]) repeatedDigitsTotalNumber++;
-            }
-            else if (charNumber.length() == 10) {
-                if (charNumber[0] == charNumber[1] || charNumber[0] == charNumber[2] || charNumber[0] == charNumber[3] ||
-                    charNumber[0] == charNumber[4] || charNumber[0] == charNumber[5] || charNumber[0] == charNumber[6] ||
-                    charNumber[0] == charNumber[7] || charNumber[0] == charNumber[8] || charNumber[0] == charNumber[9] ||
-                    charNumber[1] == charNumber[2] || charNumber[1] == charNumber[3] || charNumber[1] == charNumber[4] ||
-                    charNumber[1] == charNumber[5] || charNumber[1] == charNumber[6] || charNumber[1] == charNumber[7] ||
-                    charNumber[1] == charNumber[8] || charNumber[1] == charNumber[9] || charNumber[2] == charNumber[3] ||
-                    charNumber[2] == charNumber[4] || charNumber[2] == charNumber[5] || charNumber[2] == charNumber[6] ||
-                    charNumber[2] == charNumber[7] || charNumber[2] == charNumber[8] || charNumber[2] == charNumber[9] ||
-                    charNumber[3] == charNumber[4] || charNumber[3] == charNumber[5] || charNumber[3] == charNumber[6] ||
-                    charNumber[3] == charNumber[7] || charNumber[3] == charNumber[8] || charNumber[3] == charNumber[9] ||
-                    charNumber[4] == charNumber[5] || charNumber[4] == charNumber[6] || charNumber[4] == charNumber[7] ||
-                    charNumber[4] == charNumber[8] || charNumber[4] == charNumber[9] || charNumber[5] == charNumber[6] ||
-                    charNumber[5] == charNumber[7] || charNumber[5] == charNumber[8] || charNumber[5] == charNumber[9] ||
-                    charNumber[6] == charNumber[7] || charNumber[6] == charNumber[8] || charNumber[6] == charNumber[9] ||
-                    charNumber[7] == charNumber[8] || charNumber[7] == charNumber[9] || charNumber[8] == charNumber[9]) repeatedDigitsTotalNumber++;
-            }
+        for (int i = 1; i <= n; i++) { //цикл для инициализации проверки всех чисел от единицы до введённого включительно
+            string charNumber = std::to_string(i);
+            repeatedDigitsTotalNumber = findRepeatingNumbers(charNumber, repeatedDigitsTotalNumber);
         }
-        cout << "Итого чисел с хотя бы одной повторяющейся цифрой: " << repeatedDigitsTotalNumber;
+
+        cout << "Итого чисел с повторяющимися цифрами: " << repeatedDigitsTotalNumber; //вывод результата работы функции для поиска чисел с повторяющимися цифрами
     }
     else if (taskNumber == 6) { //задача 6
         cout << "Задача не реализована.";
     }
     else if (taskNumber == 7) { //задача 7
+        cout << "Задача 7.\nДан массив положительных целых чисел, которые нужно обработать по следующему правилу: если X[i] > X[j], то их X[i] вычитается X[j].\n" <<
+                "Когда подобные преобразования более невозможны, выведите сумму элементов получившегося массива.";
+
         vector<int> numbersArray; //массив для чисел задачи
         int n = 0; //размерность массива
         int maxNumber = 0; //максимальное число в массиве
@@ -376,7 +426,7 @@ void taskNumberCheck(int taskNumber) { //функция для запуска о
             }
             numbersArray[maxNumberIndex] -= numbersArray[secondMaxNumberIndex]; //расчёт нового значения для максимального
 
-            cout << "Шаг " << stepCount << ": ";
+            cout << "Шаг " << stepCount << ": "; // вывод массива после каждого шага
             for (int i = 0; i < numbersArray.size(); i++) {
                 cout << numbersArray[i] << " | ";
             }
@@ -393,6 +443,8 @@ void taskNumberCheck(int taskNumber) { //функция для запуска о
         cout << "Задача не реализована.";
     }
     else if (taskNumber == 9) { //задача 9
+        cout << "Задача 9.\nДля некоторого массива [x1, x2, x3, ..., xn] вычислите последнюю цифру в результате выражения x1 ^ (x2 ^ (x3 ^ (... ^ xn))).";
+
         vector<int> equationNumbers; //массив с числами для многоступенчатой степени (первое число - всегда основа степени)
         int n; //размерность массива чисел
         int endingNumber = 0; //переменная для хранения последних цифр чисел, возведённых в степень
@@ -421,11 +473,11 @@ void taskNumberCheck(int taskNumber) { //функция для запуска о
 int main() {
     int task = 0;
     std::setlocale(LC_ALL, "Russian"); //установка локали на русский язык
-    cout << "Введите номер сложной задачи:\n";
-    while (!(cin >> task)) { //проверка ввода
-        cout << "Ошибка ввода. Попробуйте ввести номер сложной задачи ещё раз.\n";
-        cin.clear(); //сброс ошибки
-        cin.ignore(32767, '\n'); //очистка ввода
+    cout << "Введите номер сложной задачи от 1 до 10:\n";
+    cin >> task; //ввод номера сложной задачи
+    while (task < 1 || task > 10) { //проверка ввода (если допущена ошибка - вводить число, пока оно не будет в промежутке [1; 10]
+        cout << "Введено некорректное число. Введите число от 1 до 10: ";
+        cin >> task;
     }
 
     taskNumberCheck(task); //обращение к функции для выбора определённый задачи
